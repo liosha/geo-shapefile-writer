@@ -27,16 +27,38 @@ my %shape_type = (
 
 =method new
     
-    my $shp_writer = Geo::Shapefile::Writer->new( $name, $type, @dbf_fields );
+    my $shp_writer = Geo::Shapefile::Writer->new( $name, $type, @attr_descriptions );
 
-Constructor.
-Creates object and 3 associated files
+Create object and 3 associated files.
+Possible attribute description formats:
+* scalar - just field name
+* arrayref [ $name, $type, $length, $decimals ]
+* hashref { name => $name, type => 'N', length => 8,  decimals => 0 } - CAM::DBF-compatible 
+
+Defaults will be used if field is not completely described
 
 =cut
 
+{
+my @default_attr_format = ( C => 64 );
+
+sub _get_attr_format {
+    my ($format) = @_;
+
+    my @descr = !ref $format        ? ($format)
+        : ref $format eq 'ARRAY'    ? @$format
+        : ref $format eq 'HASH'     ? @$format{ qw/ name type length decimals / }
+                                    : ();
+
+    croak 'Bad format description'      if !$descr[0];
+
+    @descr[1,2] = @default_attr_format  if !$descr[1];
+    return \@descr;
+}
+}
+
 sub new {
-    my $class = shift;
-    my ($name, $type, @dbf_fields) = @_;
+    my ($class, $name, $type, @attrs) = @_;
 
     my $shape_type = $shape_type{ uc($type || q{}) };
     croak "Invalid shape type: $type"  if !defined $shape_type;
@@ -58,11 +80,14 @@ sub new {
     print {$self->{SHX}} $header_data; 
 
     unlink "$name.dbf"  if -f "$name.dbf";
-    $self->{DBF} = XBase->create( name => "$name.dbf",
-        field_names     => [ map { $_->{name} } @dbf_fields ],
-        field_types     => [ map { $_->{type} } @dbf_fields ],
-        field_lengths   => [ map { $_->{length} } @dbf_fields ],
-        field_decimals  => [ map { $_->{decimals} } @dbf_fields ],
+
+    my @fields = map { _get_attr_format($_) } @attrs;
+    $self->{DBF} = XBase->create(
+        name            => "$name.dbf",
+        field_names     => [ map { $_->[0] } @fields ],
+        field_types     => [ map { $_->[1] } @fields ],
+        field_lengths   => [ map { $_->[2] } @fields ],
+        field_decimals  => [ map { $_->[3] } @fields ],
     );
 
     return $self;
@@ -100,6 +125,8 @@ sub _get_header {
 =method add_shape
 
     $shp_writer->add_shape( $object, @attributes );
+
+Attributes are array or arrayref or hashref
 
 =cut
 
@@ -143,7 +170,17 @@ sub add_shape {
         }
     }
 
-    $self->{DBF}->set_record( $self->{RCOUNT}, @attributes );
+    my $attr0 = $attributes[0];
+    if ( ref $attr0 eq 'HASH' ) {
+        $self->{DBF}->set_record_hash( $self->{RCOUNT}, map {( uc($_) => $attr0->{$_} )} keys %$attr0 );
+    }
+    elsif ( ref $attr0 eq 'ARRAY' ) {
+        $self->{DBF}->set_record( $self->{RCOUNT}, @$attr0 );
+    }
+    else {
+        $self->{DBF}->set_record( $self->{RCOUNT}, @attributes );
+    }
+
     $self->{RCOUNT} ++;
 
     print {$self->{SHX}} pack 'NN', $self->{SHP_SIZE}, length($rdata)/2;
