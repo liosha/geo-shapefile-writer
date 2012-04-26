@@ -7,6 +7,13 @@ package Geo::Shapefile::Writer;
 
 # $Id$
 
+=head1 DESCRIPTION
+
+Geo::Shapelib is cool, but not portable.
+So here is alternative, if you need just simple shp export.
+
+=cut
+
 use utf8;
 use autodie;
 use Carp;
@@ -199,7 +206,7 @@ sub add_shape {
 }
 
 
-=merhod finalize
+=method finalize
 
     $shp_writer->finalize();
 
