@@ -1,13 +1,14 @@
-package Geo::Shapefile::Writer;
-
-# ABSTRACT: simple pureperl shapefile writer
-
 use 5.010;
 use strict;
 use warnings;
+
+package Geo::Shapefile::Writer;
+# ABSTRACT: simple pureperl shapefile writer
+
+# $Id$
+
 use utf8;
 use autodie;
-
 use Carp;
 
 use CAM::DBF;
