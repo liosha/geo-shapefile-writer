@@ -11,7 +11,7 @@ use utf8;
 use autodie;
 use Carp;
 
-use CAM::DBF;
+use XBase;
 use List::Util qw/ min max /;
 
 
@@ -57,9 +57,13 @@ sub new {
     open $self->{SHX}, '>:raw', "$name.shx";
     print {$self->{SHX}} $header_data; 
 
-    my $dbf = CAM::DBF->create( "$name.dbf", @dbf_fields );
-#    $dbf->writeHeader();
-    $self->{DBF} = $dbf;
+    unlink "$name.dbf"  if -f "$name.dbf";
+    $self->{DBF} = XBase->create( name => "$name.dbf",
+        field_names     => [ map { $_->{name} } @dbf_fields ],
+        field_types     => [ map { $_->{type} } @dbf_fields ],
+        field_lengths   => [ map { $_->{length} } @dbf_fields ],
+        field_decimals  => [ map { $_->{decimals} } @dbf_fields ],
+    );
 
     return $self;
 }
@@ -139,6 +143,7 @@ sub add_shape {
         }
     }
 
+    $self->{DBF}->set_record( $self->{RCOUNT}, @attributes );
     $self->{RCOUNT} ++;
 
     print {$self->{SHX}} pack 'NN', $self->{SHP_SIZE}, length($rdata)/2;
@@ -147,8 +152,6 @@ sub add_shape {
     print {$self->{SHP}} pack 'NN', $self->{RCOUNT}, length($rdata)/2;
     print {$self->{SHP}} $rdata;
     $self->{SHP_SIZE} += 4+length($rdata)/2;
-
-    $self->{DBF}->appendrow_arrayref( \@attributes );
 
     $self->{XMIN} = min grep {defined} ($xmin, $self->{XMIN});
     $self->{YMIN} = min grep {defined} ($ymin, $self->{YMIN});
@@ -180,7 +183,7 @@ sub finalize {
     print {$shx} $self->_get_header('SHX');
     close $shx;
 
-    $self->{DBF}->closeDB();
+    $self->{DBF}->close();
 
     return;
 }
