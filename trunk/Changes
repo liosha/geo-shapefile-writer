@@ -1,5 +1,9 @@
 Revision history for Geo-Shapefile-Writer
 
+0.003   August 02 2012
+        File header fix
+        Documentation improved
+
 0.002   April 26 2012
         Initial cpan release.
         Implemented writing for points, polygons and polylines.
