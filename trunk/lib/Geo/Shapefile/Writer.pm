@@ -152,7 +152,9 @@ sub _get_header {
 
     $shp_writer->add_shape( $shape, @attributes );
 
-$shape is point: [$x,$y], or array of points: [[$x0,$y0], ...], based on shape type.
+$shape depends on file type:
+  * point: [$x,$y]
+  * polyline or polygon: [ [[$x0,$y0], ...], \@part2, ... ] 
 
 Attributes are array or arrayref: [$val1, $val2, ...] or hashref: { $name1 => $val1, ...}
 
