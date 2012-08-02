@@ -1,7 +1,3 @@
-use 5.010;
-use strict;
-use warnings;
-
 package Geo::Shapefile::Writer;
 # ABSTRACT: simple pureperl shapefile writer
 
@@ -26,6 +22,10 @@ So here is an alternative, if you need just simple shp export.
     $shp_writer->finalize();
 
 =cut
+
+use 5.010;
+use strict;
+use warnings;
 
 use utf8;
 use autodie;
