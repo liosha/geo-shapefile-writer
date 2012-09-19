@@ -57,8 +57,11 @@ Create object and 3 associated files.
 Possible types: POINT, POLYLINE, POLYGON, more to be implemented.
 
 Possible attribute description formats:
+
   * scalar - just field name
+
   * arrayref - [ $name, $type, $length, $decimals ]
+
   * hashref - { name => $name, type => 'N', length => 8,  decimals => 0 } - CAM::DBF-compatible 
 
 Default C(64) will be used if field is not completely described
@@ -153,7 +156,9 @@ sub _get_header {
     $shp_writer->add_shape( $shape, @attributes );
 
 $shape depends on file type:
+
   * point: [$x,$y]
+
   * polyline or polygon: [ [[$x0,$y0], ...], \@part2, ... ] 
 
 Attributes are array or arrayref: [$val1, $val2, ...] or hashref: { $name1 => $val1, ...}
