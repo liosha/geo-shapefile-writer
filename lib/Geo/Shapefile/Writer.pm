@@ -1,10 +1,6 @@
-use 5.010;
-use strict;
-use warnings;
+package Geo::Shapefile::Writer;
 
 # $Id$
-
-package Geo::Shapefile::Writer;
 
 # NAME: Geo::Shapefile::Writer
 # ABSTRACT: simple pureperl shapefile writer
@@ -29,6 +25,9 @@ So here is an alternative, if you need just simple shp export.
 
 =cut
 
+use 5.010;
+use strict;
+use warnings;
 
 use utf8;
 use autodie;
@@ -54,7 +53,7 @@ my %shape_type = (
 
 Create object and 3 associated files.
 
-Possible types: POINT, POLYLINE, POLYGON, more to be implemented.
+Possible types: POINT, POLYLINE, POLYGON (more to be implemented).
 
 Possible attribute description formats:
 
