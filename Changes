@@ -1,5 +1,8 @@
 Revision history for Geo-Shapefile-Writer
 
+0.004   July 30, 2014
+        experimental features removed (thanks Shawn Laffan)
+
 0.004   December 29, 2012
         tests
 
