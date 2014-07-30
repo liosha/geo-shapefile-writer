@@ -170,39 +170,38 @@ sub add_shape {
     my ($xmin, $ymin, $xmax, $ymax);
 
     my $rdata;
-    given ( $self->{TYPE} ) {
-        when ( $shape_type{NULL} ) {
-            $rdata = pack( 'L', $self->{TYPE} );
-        }
+    my $type = $self->{TYPE};
 
-        when ( $shape_type{POINT} ) {
-            $rdata = pack( 'Ldd', $self->{TYPE}, @$data );
-            ($xmin, $ymin, $xmax, $ymax) = ( @$data, @$data );
-        }
-
-        when ( [ @shape_type{'POLYLINE','POLYGON'} ] ) {
-            my $rpart = q{};
-            my $rpoint = q{};
-            my $ipoint = 0;
-
-            for my $line ( @$data ) {
-                $rpart .= pack 'L', $ipoint;
-                for my $point ( @$line ) {
-                    my ($x, $y) = @$point;
-                    $rpoint .= pack 'dd', $x, $y;
-                    $ipoint ++;
-                }
-            }
-
-            $xmin = min map {$_->[0]} map {@$_} @$data;
-            $ymin = min map {$_->[1]} map {@$_} @$data;
-            $xmax = max map {$_->[0]} map {@$_} @$data;
-            $ymax = max map {$_->[1]} map {@$_} @$data;
-
-            $rdata = pack 'LddddLL', $self->{TYPE}, $xmin, $ymin, $xmax, $ymax, scalar @$data, $ipoint;
-            $rdata .= $rpart . $rpoint;
-        }
+    if ($type == $shape_type{NULL} ) {
+        $rdata = pack( 'L', $self->{TYPE} );
     }
+    elsif ($type == $shape_type{POINT} ) {
+        $rdata = pack( 'Ldd', $self->{TYPE}, @$data );
+        ($xmin, $ymin, $xmax, $ymax) = ( @$data, @$data );
+    }
+    elsif ($type == $shape_type{POLYLINE} || $type == $shape_type{POLYGON} ) {
+        my $rpart = q{};
+        my $rpoint = q{};
+        my $ipoint = 0;
+
+        for my $line ( @$data ) {
+            $rpart .= pack 'L', $ipoint;
+            for my $point ( @$line ) {
+                my ($x, $y) = @$point;
+                $rpoint .= pack 'dd', $x, $y;
+                $ipoint ++;
+            }
+        }
+
+        $xmin = min map {$_->[0]} map {@$_} @$data;
+        $ymin = min map {$_->[1]} map {@$_} @$data;
+        $xmax = max map {$_->[0]} map {@$_} @$data;
+        $ymax = max map {$_->[1]} map {@$_} @$data;
+
+        $rdata = pack 'LddddLL', $self->{TYPE}, $xmin, $ymin, $xmax, $ymax, scalar @$data, $ipoint;
+        $rdata .= $rpart . $rpoint;
+    }
+    
 
     my $attr0 = $attributes[0];
     if ( ref $attr0 eq 'HASH' ) {
