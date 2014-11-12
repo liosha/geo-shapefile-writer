@@ -144,7 +144,7 @@ sub _get_header {
         map {[ $_->[0], $_->[1], $_->[2] && ($self->{$_->[2]} // $self->{"$file_type$_->[2]"}) // $_->[3] ]}
         @header_fields;
 
-    my $pack_string = join q{ }, map { sprintf '@%d%s', @$_ } (@use_fields, [$header_size, q{}]);
+    my $pack_string = join q{ }, map { sprintf '@%d%s', @$_[0,1] } (@use_fields, [$header_size, q{}]);
     return pack $pack_string, map { $_->[2] } @use_fields;
 }
 }
